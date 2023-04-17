@@ -22,7 +22,7 @@ mybatis-plus:
 aliyun:
   oss:
     endpoint: "https://oss-cn-hangzhou.aliyuncs.com"
-    accessKeyId: "LTAI5t9XJ494wcipCfhm9uk"
+    accessKeyId: "LTAI5t9XJ494wcipCfhm9ukC"
     accessKeySecret: "rKLkFj9KCciMrKy9tS8L4JwYqfemur"
     bucketName: "spring-talis"
 #spring事务管理日志
