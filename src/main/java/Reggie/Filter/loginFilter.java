@@ -1,6 +1,7 @@
 package Reggie.Filter;
 
 import Reggie.common.Result;
+import Reggie.utils.BaseContext;
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -44,6 +45,8 @@ public class loginFilter implements Filter {
         //判断登录状态，如果登录成功则直接放行.
        if(httpServletRequest.getSession().getAttribute("employee")!=null){
            log.info("用户{}已经登录",httpServletRequest.getSession().getAttribute("employee"));
+           Long empl = (Long) httpServletRequest.getSession().getAttribute("employee");
+           BaseContext.setID(empl);
            filterChain.doFilter(httpServletRequest,httpServletResponse);
            return;
        }

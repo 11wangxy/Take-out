@@ -11,4 +11,8 @@ public class GlobalException {
         exception.printStackTrace();
         return Result.error("操作失败");
     }
+    @ExceptionHandler(CustomException.class)
+    public Result<String> ex(CustomException exception){
+        return Result.error(exception.getMessage());
+    }
 }
