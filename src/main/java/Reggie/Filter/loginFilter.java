@@ -33,7 +33,10 @@ public class loginFilter implements Filter {
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/demo/**"
+                "/demo/**",
+                "/common/**",
+                "/user/sendMsg",
+                "/user/login"
         };
         //遍历检查
         boolean check = check(urls, requestURI);
@@ -43,7 +46,7 @@ public class loginFilter implements Filter {
             filterChain.doFilter(httpServletRequest,httpServletResponse);
             return;
         }
-        //判断登录状态，如果登录成功则直接放行.
+        //1判断网页端登录状态，如果登录成功则直接放行.
        if(httpServletRequest.getSession().getAttribute("employee")!=null){
            log.info("用户{}已经登录",httpServletRequest.getSession().getAttribute("employee"));
            Long empl = (Long) httpServletRequest.getSession().getAttribute("employee");
@@ -51,11 +54,18 @@ public class loginFilter implements Filter {
            filterChain.doFilter(httpServletRequest,httpServletResponse);
            return;
        }
+        //2判断移动端登录状态，如果登录成功则直接放行.
+        if(httpServletRequest.getSession().getAttribute("user")!=null){
+            log.info("用户{}已经登录",httpServletRequest.getSession().getAttribute("user"));
+            Long userid = (Long) httpServletRequest.getSession().getAttribute("user");
+            BaseContext.setID(userid);
+            filterChain.doFilter(httpServletRequest,httpServletResponse);
+            return;
+        }
         log.info("用户未登录");
         //未登录则返回未登录结果
         httpServletResponse.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));
         return;
-
     }
 
     //检查路径是否符合要求

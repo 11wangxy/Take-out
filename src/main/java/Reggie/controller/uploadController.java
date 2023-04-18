@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.net.URL;
 
 @Slf4j
 @RestController
@@ -33,24 +32,21 @@ public class uploadController {
         return Result.success(s);
     }
 
-    @GetMapping("/download")
-    public void download(String name, HttpServletResponse httpServletResponse) throws IOException {
-        log.info("文件下载{}", name);
-       try{
-           FileInputStream fileInputStream = new FileInputStream(new File(name));
-           ServletOutputStream outputStream = httpServletResponse.getOutputStream();
-
-           httpServletResponse.setContentType("image/jpg");
-           int len =0;
-           byte[] bytes = new byte[1024];
-           while ((fileInputStream.read(bytes))!=-1){
-               outputStream.write(bytes, 0 ,len);
-               outputStream.flush();
-           }
-           outputStream.close();
-           fileInputStream.close();
-       }catch (Exception e){
-           e.printStackTrace();
-       }
-    }
+//    @GetMapping("/download")
+//    public void download(String name, HttpServletResponse response) throws Exception{
+//        log.info("文件下载  {}", name);
+//        String download = aliOSSUtils.download(name);
+//        log.info("文件路径{}",download);
+//        FileInputStream fileInputStream = new FileInputStream(new File(download));
+//        ServletOutputStream outputStream = response.getOutputStream();
+//        response.setContentType("image/jpg");
+//        int len = 0;
+//        byte[] bytes = new byte[1024];
+//        while ((fileInputStream.read(bytes)) != -1) {
+//            outputStream.write(bytes, 0, len);
+//            outputStream.flush();
+//        }
+//        outputStream.close();
+//        fileInputStream.close();
+//    }
 }
