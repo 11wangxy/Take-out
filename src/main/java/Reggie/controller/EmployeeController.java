@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -81,9 +83,9 @@ public class EmployeeController {
     public Result<String> update(HttpServletRequest request,@RequestBody Employee employee) {
         log.info(employee.toString());
 
-//        employee.setUpdateTime(LocalDateTime.now());
-//        Long attribute = (Long) request.getSession().getAttribute("employee");
-//        employee.setUpdateUser(attribute);
+        employee.setUpdateTime(LocalDateTime.now());
+        Long attribute = (Long) request.getSession().getAttribute("employee");
+        employee.setUpdateUser(attribute);
         employeeService.updateById(employee);
         return Result.success("员工信息修改成功");
     }

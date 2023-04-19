@@ -43,11 +43,17 @@ public class UserController {
     private static final long CODE_INTERVAL = 30 * 1000; //验证码间隔时间，单位为毫秒
     private static final long CODE_EXPIRE = 5 * 60 * 1000; //验证码有效时间，单位为毫秒
 
-
+    /**
+     * 发送验证码
+     *
+     * @param user    邮箱信息封装
+     * @param session 会话
+     * @return
+     */
     @PostMapping("/sendMsg")
-    private Result<String> sendMsg(@RequestBody User user, HttpSession session){
+    private Result<String> sendMsg(@RequestBody User user, HttpSession session) {
         String phone = user.getPhone();
-        if (StringUtils.isNotEmpty(phone)){
+        if (StringUtils.isNotEmpty(phone)) {
             //检查时间间隔
             long now = System.currentTimeMillis();
             String lastTimeStr = (String) session.getAttribute(phone + "_time");
@@ -59,7 +65,7 @@ public class UserController {
             }
             SimpleMailMessage message = new SimpleMailMessage();
             String code = codeGenerator.generate(6);
-            log.info("接收邮箱为{}生成验证码为{}",phone,code);
+            log.info("接收邮箱为{}生成验证码为{}", phone, code);
             message.setSubject("验证码");
             message.setText("你收到的验证码是：" + code + "\n验证码一次有效，五分钟后失效。\n发送时间："
                     + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
@@ -67,7 +73,7 @@ public class UserController {
             message.setFrom(username);
             mailSender.send(message);
             //验证码保存到session
-            session.setAttribute(phone,code);
+            session.setAttribute(phone, code);
             session.setAttribute(phone + "_time", String.valueOf(now));
             log.info("邮箱验证码发送成功，请及时查看");
             return Result.success("邮箱验证码发送成功，请及时查看");
@@ -75,36 +81,51 @@ public class UserController {
         return Result.error("验证码发送失败，请再次尝试");
     }
 
+    /**
+     * 用户登录
+     *
+     * @param map     用户信息封装
+     * @param session 会话
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/login")
-    private Result<String> login(@RequestBody Map map, HttpSession session) throws Exception{
+    private Result<User> login(@RequestBody Map map, HttpSession session) throws Exception {
         log.info(map.toString());
         //获取邮箱
         String phone = map.get("phone").toString();
         //获取验证码
         String code = map.get("code").toString();
         //从session中获取保存的验证码，对比
-        Object sessionCode =  session.getAttribute(phone);
-        if (StringUtils.isNotEmpty(code)&&sessionCode.equals(code)) {
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getPhone,phone);
-            String sessionTimeStr = (String) session.getAttribute(phone + "_time");
-            if (sessionCode != null && sessionTimeStr != null) {
-                long sessionTime = Long.parseLong(sessionTimeStr);
-                if (System.currentTimeMillis() - sessionTime < CODE_EXPIRE) {
-                    if (code.equals(sessionCode)) {
-                        //验证通过
-                        session.removeAttribute(phone);
-                        session.removeAttribute(phone + "_time");
-                        return Result.success("验证码验证通过");
-                    } else {
-                        return Result.error("验证码错误，请重新输入");
-                    }
-                } else {
-                    return Result.error("验证码已失效，请重新获取");
+        Object sessionCode = session.getAttribute(phone);
+        if (StringUtils.isNotEmpty(code) && sessionCode != null && sessionCode.equals(code)) {
+            //判断验证码是否过期
+            long now = System.currentTimeMillis();
+            String lastTimeStr = (String) session.getAttribute(phone + "_time");
+            if (lastTimeStr != null) {
+                long lastTime = Long.parseLong(lastTimeStr);
+                if (now - lastTime > CODE_EXPIRE) {
+                    session.removeAttribute(phone);
+                    session.removeAttribute(phone + "_time");
+                    return Result.error("验证码已过期，请重新获取");
                 }
             }
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getPhone, phone);
+            User user = userService.getOne(queryWrapper);
+
+            if (user == null) {
+                user = new User();
+                user.setPhone(phone);
+                user.setStatus(1);
+                userService.save(user);
+            }
+            session.setAttribute("user", user.getId());
+            //登录成功后删除验证码
+            session.removeAttribute(phone);
+            session.removeAttribute(phone + "_time");
+            return Result.success(user);
         }
-        return Result.error("验证码验证失败，请重新尝试");
+        return Result.error("验证失败");
     }
 }
-
