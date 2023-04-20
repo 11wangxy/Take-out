@@ -98,6 +98,5 @@ public class EmployeeController {
         {
             return Result.success(employee);
         }else {return Result.error("没有该员工信息");}
-
     }
 }

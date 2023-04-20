@@ -50,6 +50,7 @@ public class UserController {
      * @param session 会话
      * @return
      */
+
     @PostMapping("/sendMsg")
     private Result<String> sendMsg(@RequestBody User user, HttpSession session) {
         String phone = user.getPhone();
@@ -65,7 +66,7 @@ public class UserController {
             }
             SimpleMailMessage message = new SimpleMailMessage();
             String code = codeGenerator.generate(6);
-            log.info("接收邮箱为{}生成验证码为{}", phone, code);
+            log.info("接收邮箱为{}  生成验证码为{}", phone, code);
             message.setSubject("验证码");
             message.setText("你收到的验证码是：" + code + "\n验证码一次有效，五分钟后失效。\n发送时间："
                     + LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));

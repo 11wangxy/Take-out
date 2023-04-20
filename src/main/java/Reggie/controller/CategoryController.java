@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -51,4 +52,19 @@ public class CategoryController {
         categoryService.updateById(category);
         return Result.success("修改分类信息成功");
     }
+
+    /**
+     * 根据条件查询
+     * @param category
+     * @return
+     */
+    @GetMapping("/list")
+    public Result<List<Category>> list(Category category){
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(category.getType()!=null,Category::getType,category.getType());
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = categoryService.list(queryWrapper);
+        return Result.success(list);
+    }
 }
+

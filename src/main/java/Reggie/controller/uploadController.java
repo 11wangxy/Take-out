@@ -3,11 +3,8 @@ package Reggie.controller;
 
 import Reggie.common.Result;
 import Reggie.utils.AliOSSUtils;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,10 +22,8 @@ public class uploadController {
     //存储云服务
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) throws IOException {
-        log.info("文件上传{}", file.getOriginalFilename());
         //调用阿里云oss工具类
         String s = aliOSSUtils.upload(file);
-        log.info("文件已经上传完毕");
         return Result.success(s);
     }
 

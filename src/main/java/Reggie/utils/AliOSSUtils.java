@@ -1,9 +1,11 @@
 package Reggie.utils;
 
+import Reggie.common.Result;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.GetObjectRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -13,12 +15,14 @@ import com.aliyun.oss.ClientException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.UUID;
 
 /**
  * 阿里云 OSS 工具类
  */
 @Component
+@Slf4j
 //使用注解把对象交给IOC管理，取代new生成对象
 public class AliOSSUtils {
 
@@ -54,6 +58,7 @@ public class AliOSSUtils {
 
         //文件访问路径
         String url = endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + fileName;
+        log.info("文件{}上传阿里云oss成功，访问路径{}", fileName, url);
         // 关闭ossClient
         ossClient.shutdown();
         return url;// 把上传到oss的路径返回
@@ -64,17 +69,33 @@ public class AliOSSUtils {
         String endpoint = aliOSSproperties.getEndpoint();
         String bucketName = aliOSSproperties.getBucketName();
         String accessKeySecret = aliOSSproperties.getAccessKeySecret();
-        String accessKeyId = aliOSSproperties.getAccessKeyId(); // 要下载的文件本地保存路径
-        String filename = objectName.substring(objectName.lastIndexOf('/')+1);
+        String accessKeyId = aliOSSproperties.getAccessKeyId();
+        // 要下载的文件本地保存路径
+        String filename = objectName.substring(objectName.lastIndexOf('/') + 1);
         String pathName = "D:\\" + filename;
 
         // 下载文件到本地
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
         ossClient.getObject(new GetObjectRequest(bucketName, filename), new File(pathName));
-
-       // 返回下载链接
+        log.info("文件：{}下载成功，下载路径为：{}", filename, pathName);
+        // 返回下载到的路径
         return pathName;
     }
+
+    public Result<String> delete(String objectName) throws Exception {
+        String endpoint = aliOSSproperties.getEndpoint();
+        String bucketName = aliOSSproperties.getBucketName();
+        String accessKeySecret = aliOSSproperties.getAccessKeySecret();
+        String accessKeyId = aliOSSproperties.getAccessKeyId(); // 要下载的文件本地保存路径
+        String filename = objectName.substring(objectName.lastIndexOf('/') + 1);
+
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        ossClient.deleteObject(bucketName, filename);
+
+        return Result.success("文件删除成功:" + filename);
+    }
 }
+
+
 
 
