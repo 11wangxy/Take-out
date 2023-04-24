@@ -63,7 +63,7 @@
                     const regex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
                     if (regex.test(this.form.phone)) {
                         this.msgFlag = false
-                        // this.form.code = (Math.random()*1000000).toFixed(0)
+                        //this.form.code = (Math.random()*1000000).toFixed(0)
                         sendMsgApi({phone:this.form.phone})
                     }else{
                         this.msgFlag = true
