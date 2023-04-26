@@ -5,6 +5,7 @@ import Reggie.common.Result;
 import Reggie.pojo.Category;
 import Reggie.pojo.Setmeal;
 import Reggie.pojo.SetmealDish;
+import Reggie.pojo.User;
 import Reggie.service.CategoryService;
 import Reggie.service.SetmealService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
