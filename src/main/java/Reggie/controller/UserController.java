@@ -62,14 +62,14 @@ public class UserController {
         String phone = user.getPhone();
         if (StringUtils.isNotEmpty(phone)) {
             //检查时间间隔
-            long now = System.currentTimeMillis();
-            String lastTimeStr = (String) session.getAttribute(phone + "_time");
-            if (lastTimeStr != null) {
-                long lastTime = Long.parseLong(lastTimeStr);
-                if (now - lastTime < CODE_INTERVAL) {
-                    return Result.error("验证码发送失败，请稍后再试");
-                }
-            }
+//            long now = System.currentTimeMillis();
+//            String lastTimeStr = (String) session.getAttribute(phone + "_time");
+//            if (lastTimeStr != null) {
+//                long lastTime = Long.parseLong(lastTimeStr);
+//                if (now - lastTime < CODE_INTERVAL) {
+//                    return Result.error("验证码发送失败，请稍后再试");
+//                }
+//            }
             SimpleMailMessage message = new SimpleMailMessage();
             String code = codeGenerator.generate(6);
             log.info("接收邮箱为{}  生成验证码为{}", phone, code);
@@ -79,10 +79,8 @@ public class UserController {
             message.setTo(phone); //收件人邮箱地址,请自行修改
             message.setFrom(username);
             mailSender.send(message);
-            //验证码保存到session
-//            session.setAttribute(phone, code);
-//            session.setAttribute(phone + "_time", String.valueOf(now));
-            redisTemplate.opsForValue().set(phone,code,5, TimeUnit.MINUTES);
+            //验证码保存到redis
+            redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
             log.info("邮箱验证码发送成功，请及时查看");
             return Result.success("邮箱验证码发送成功，请及时查看");
         }
@@ -104,21 +102,9 @@ public class UserController {
         String phone = map.get("phone").toString();
         //获取验证码
         String code = map.get("code").toString();
-        //从session中获取保存的验证码，对比
-//        Object sessionCode = session.getAttribute(phone);
-        Object sessionCode =redisTemplate.opsForValue().get(phone);
+        //从redis中获取保存的验证码，对比
+        Object sessionCode = redisTemplate.opsForValue().get(phone);
         if (StringUtils.isNotEmpty(code) && sessionCode != null && sessionCode.equals(code)) {
-            //判断验证码是否过期
-//            long now = System.currentTimeMillis();
-//            String lastTimeStr = (String) session.getAttribute(phone + "_time");
-//            if (lastTimeStr != null) {
-//                long lastTime = Long.parseLong(lastTimeStr);
-//                if (now - lastTime > CODE_EXPIRE) {
-//                    session.removeAttribute(phone);
-//                    session.removeAttribute(phone + "_time");
-//                    return Result.error("验证码已过期，请重新获取");
-//                }
-//            }
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(User::getPhone, phone);
             User user = userService.getOne(queryWrapper);
@@ -130,13 +116,12 @@ public class UserController {
                 userService.save(user);
             }
             session.setAttribute("user", user.getId());
-//            //登录成功后删除验证码
-//            session.removeAttribute(phone);
-//            session.removeAttribute(phone + "_time");
             log.info("登录成功");
             redisTemplate.delete(phone);
             return Result.success(user);
         }
-        return Result.error("验证失败");
+        return Result.error("验证失败，请重试");
     }
+
 }
+

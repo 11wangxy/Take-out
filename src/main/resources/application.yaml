@@ -5,21 +5,23 @@ spring:
     url: jdbc:mysql://localhost:3306/reggie
     username: root
     password: 20030111
-  redis:
-    host: 192.168.111.100
-    port: 6379
-    password: 20030111
-    database: 0
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: 100ms
+# boot3版本及以上需要添加data一行，否则不需要
+  data:
+    redis:
+      host: 192.168.111.100
+      port: 6379
+      password: 20030111
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 100ms
   mail:
     username: Mr_Wangxy@outlook.com  #此处修改为你的邮箱帐号
     password: GDUFE7611  #此处为你的邮箱密码
-    host:  smtp.office365.com
+    host: smtp.office365.com
     port: 587
     default-encoding: utf-8
     properties:

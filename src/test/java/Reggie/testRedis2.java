@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class testRedis2 {
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String,String> redisTemplate;
     @Test
     @Transactional
     public void test(){
-        redisTemplate.opsForValue().set("age","15");
+        redisTemplate.opsForValue().set("name","wxy");
         Object name = redisTemplate.opsForValue().get("name");
         System.out.println(name);
     }
