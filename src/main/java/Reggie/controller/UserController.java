@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -27,7 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Controller
+@RestController
 @Slf4j
 @RequestMapping("/user")
 public class UserController {
@@ -46,9 +47,6 @@ public class UserController {
     @Value("${spring.mail.username}")
     private String username;
 
-    private static final long CODE_INTERVAL = 30 * 1000; //验证码间隔时间，单位为毫秒
-    private static final long CODE_EXPIRE = 5 * 60 * 1000; //验证码有效时间，单位为毫秒
-
     /**
      * 发送验证码
      *
@@ -61,15 +59,6 @@ public class UserController {
     private Result<String> sendMsg(@RequestBody User user, HttpSession session) {
         String phone = user.getPhone();
         if (StringUtils.isNotEmpty(phone)) {
-            //检查时间间隔
-//            long now = System.currentTimeMillis();
-//            String lastTimeStr = (String) session.getAttribute(phone + "_time");
-//            if (lastTimeStr != null) {
-//                long lastTime = Long.parseLong(lastTimeStr);
-//                if (now - lastTime < CODE_INTERVAL) {
-//                    return Result.error("验证码发送失败，请稍后再试");
-//                }
-//            }
             SimpleMailMessage message = new SimpleMailMessage();
             String code = codeGenerator.generate(6);
             log.info("接收邮箱为{}  生成验证码为{}", phone, code);
@@ -122,6 +111,5 @@ public class UserController {
         }
         return Result.error("验证失败，请重试");
     }
-
 }
 
